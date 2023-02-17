@@ -137,7 +137,7 @@ void game_save(cgame g, char* filename) { game_save_int(g, filename, false); }
 static bool _checkErr(game g) {
     for (int x = g->nb_cols - 1; x >= 0; x--) {
         for (int y = g->nb_rows - 1; y >= 0; y--) {
-            if( game_has_error(g, x, y)){
+            if (game_has_error(g, x, y)) {
                 return true;
             }
         }
@@ -152,7 +152,6 @@ static bool genGame(int pos, int size, game g, bool stopAtFirstSolution, int* ge
         *generatedGame = *generatedGame + 1;
         if (game_is_over(g)) {
             *solutionFind = *solutionFind + 1;
-            // game_print(g);
             return true;
         }
 
@@ -198,7 +197,6 @@ bool game_solve(game g) {
     int solutionFound = 0;
 
     if (genGame(0, (g->nb_cols * g->nb_rows), g, true, &generatedGame, &solutionFound)) {
-        printf("Stats:\n    - generated Game: %d", generatedGame);
         return true;
     }
 
@@ -211,7 +209,6 @@ uint game_nb_solutions(cgame g) {
     game workingGame = game_copy(g);
     genGame(0, (g->nb_cols * g->nb_rows), workingGame, false, &generatedGame, &solutionFound);
     game_delete(workingGame);
-    printf("Stats:\n    - generated Game: %d\n ", generatedGame);
 
     return solutionFound;
 }

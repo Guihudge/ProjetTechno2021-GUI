@@ -1,6 +1,7 @@
 /**
  * @file SDLUtils.h
- * @author Guillaume Dindart (you@domain.com)
+ * @author Guillaume Dindart (guillaume.dindart@etu.u-bordeaux.fr)
+ * @author Enzo Cornaggia (enzo.cornaggia@etu.u-bordeaux.fr)
  * @brief Basic SDL helper function for lightup game
  * @version 0.2
  * @date 2022-03-08
@@ -13,101 +14,184 @@
 #define __SDLUTILS_H__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 
 #include "../libgame/game.h"
 #include "env.h"
 
 #define WINDOW_NAME "Lightup"
+#define SPACE 20
 #define SPRITE_SIZE 64
 #define WINDOW_HEIGHT 800
 #define WINDOW_LENGHT 600
+#define MENU_X 250
+#define MENU_Y 160
 
 /**
- * @brief Init game environement
+ * @brief Calculate a delta time in ms
  *
- * @return game_env : the game environement
+ * @param start Start time
+ * @param end End time
+ * @return A double
  */
-game_env init_game_environment(game g);
+double deltaTime(struct timeval start, struct timeval end);
 
 /**
- * @brief Print SDL erre and de-init if necessary
+ * @brief Update the title of the window
  *
- * @param init true if windows is init
+ * @param pWindow An SDL2 window
+ * @param genv The game environment
+ * @return A double
  */
-void SDL_printError(bool init);
+void update_title_Window(SDL_Window* pWindow, game_env genv);
 
 /**
- * @brief init game and set windows name
+ * @brief Init the base of window and renderer
  *
- * @param pRenderer a pointer for the renderer
- * @param pWindow a pointer for the window
+ * @param pRenderer An SDL2 renderer
+ * @param pWindow An SDL2 window
  */
 void SDL_initAndSetName(SDL_Renderer** pRenderer, SDL_Window** pWindow);
 
 /**
- * @brief de-init SDL for propoer exit
+ * @brief Load wall texture from directory img
  *
- * @param pRenderer a pointer for the renderer
- * @param pWindow a pointer for the window
+ * @param genv The game environment
+ * @param pRenderer An SDL2 renderer
  */
-void SDL_end(SDL_Renderer* pRenderer, SDL_Window* pWindow);
+void loadWallTexture(game_env genv, SDL_Renderer* pRenderer);
 
 /**
- * @brief Draw a grid on window, the size is defined by nb_cols and nb_rows
+ * @brief Print an SDL2 error
  *
- * @param genv game environment
- * @param pRenderer a pointer for the Renderer
- */
-void SDL_drawGrid(game_env genv, SDL_Renderer* pRenderer);
-
-/**
- * @brief Convert mouse coordinate to game internal coordinate
- *
- * @param genv game environment
- */
-void SDL_MouseToCase(game_env genv);
-
-/**
- * @brief Fill the case in black
- *
- * @param genv game environment
- * @param pRenderer a pointer for the Renderer
- */
-void SDL_DrawCase(game_env genv, SDL_Renderer* pRenderer);
-
-/**
- * @brief print some debug information on stdout
- *
- * @param pRenderer the game renderer
- * @param pWindow the game windows
+ * @param pRenderer An SDL2 renderer
+ * @param pWindow An SDL2 window
  */
 void printDebug(SDL_Renderer* pRenderer, SDL_Window* pWindow);
 
 /**
- * @brief
+ * @brief Render the main game
  *
- * @param genv
- * @param pRenderer
- * @param fps
+ * @param genv The game environement
+ * @param pRenderer An SDL2 renderer
+ * @param pWindow An SDL2 window
+ * @param fps An fps counter (Only in debug mode)
+ * @param g Actual game instance
  */
-void render(game_env genv, SDL_Renderer* pRenderer, double fps, game g);
+void render(game_env genv, SDL_Renderer* pRenderer, SDL_Window* pWindow, double fps, game g);
 
 /**
- * @brief
+ * @brief procese of main game_loop
  *
- * @param event
- * @param pWindow
- * @param genv
- * @return true
- * @return false
+ * @param event Event struct (SDL2)
+ * @param pWindow An SDL2 window
+ * @param genv The game environement
+ * @param g Actual game instance
+ * @return True then continue the loop
+ * @return False then stop the loop
  */
 bool process(SDL_Event event, SDL_Window* pWindow, game_env genv, game g);
 
-void loadWallTexture(game_env genv, SDL_Renderer* pRenderer);
+/**
+ * @brief Update the game environment with the actual playing game
+ *
+ * @param genv The game environment
+ * @param g Actual game instance
+ */
+void update_genv(game_env genv, game g);
 
-void quit(game_env genv);
+/**
+ * @brief Convert a string tab to a texture tab
+ *
+ * @param pRenderer An SDL2 renderer
+ * @param text Strings array
+ * @param nbtext Number of strings
+ * @param genv The game environment
+ * @param textColor Color of the text
+ * @return SDL_Texture** the texture array
+ */
+SDL_Texture** make_all_text_texture(SDL_Renderer* pRenderer, char* text[], int nbtext, game_env genv,
+                                    SDL_Color textColor);
 
-bool init(SDL_Renderer** pRenderer, SDL_Window** pWindow, game g, game_env genv);
+/**
+ * @brief Clean a tab of texture
+ *
+ * @param tab The texture array
+ * @param nbItem Number of texture in array
+ */
+void clean_texture_tab(SDL_Texture* tab[], int nbItem);
+
+/**
+ * @brief Render the level selection menu
+ *
+ * @param genv The game environment
+ * @param pRenderer An SDL2 renderer
+ * @param level_tex Texture of level array
+ * @param txt Level text array
+ * @param nbLevel Number of level
+ */
+void render_level_menu(game_env genv, SDL_Renderer* pRenderer, SDL_Texture* level_tex[], SDL_Texture* txt[],
+                       int nbLevel);
+
+/**
+ * @brief Draw the main menu
+ *
+ * @param pRenderer An SDL2 renderer
+ * @param pWindow An SDL2 window
+ * @param items Texture of the menu item
+ * @param nbItem Number of the item in menu
+ */
+void draw_menu(SDL_Renderer* pRenderer, SDL_Window* pWindow, SDL_Texture* items[], int nbItem);
+
+/**
+ * @brief Event gestion of level selection
+ *
+ * @param event Event structure (SDL2)
+ * @param pWindow An SDL2 window
+ * @param genv The game environment
+ * @param g Actual game instance
+ * @return True then continue
+ * @return False then stop selection
+ */
+bool level_process(SDL_Event event, SDL_Window* pWindow, game_env genv, game* g);
+
+/**
+ * @brief Write all the text of an array of char with a font and color in a texture
+ *
+ * @param pRenderer An SDL2 renderer
+ * @param text An array of character
+ * @param pFont A font
+ * @param nbtext The number of text
+ * @param genv The game environment
+ * @param textColor An SDL2 color
+ */
+SDL_Texture** make_all_text_texture(SDL_Renderer* pRenderer, char* text[], int nbtext, game_env genv,
+                                    SDL_Color textColor);
+
+/**
+ * @brief Event gestion of the main menu page
+ *
+ * @param event Event struct (SDL2)
+ * @param pWindow An SDL2 window
+ * @param nbItem Number of item
+ * @param g Pointer to the next game instance
+ * @param pRenderer An SDL2 renderer
+ * @param genv The game environment
+ * @return True then continue
+ * @return False then stop
+ */
+bool menu_process(SDL_Event event, SDL_Window* pWindow, int nbItem, game* g, SDL_Renderer* pRenderer, game_env genv);
+
+/**
+ * @brief Event gestion of the level selection page
+ *
+ * @param event Event struct (SDL2)
+ * @param genv the game environment
+ * @param g Pointer to the next game instance
+ * @return True then continue
+ * @return False then stop
+ */
+bool level_process(SDL_Event event, SDL_Window* pWindow, game_env genv, game* g);
 
 #endif
