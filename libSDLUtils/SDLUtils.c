@@ -423,7 +423,6 @@ bool process(SDL_Event event, SDL_Window* pWindow, game_env genv, game g) {
         default:
             break;
     }
-
     if (event.type == SDL_MOUSEBUTTONDOWN) {
         if (event.button.button == (SDL_BUTTON_LEFT)) {
             if (genv->mouse_x > SPACE / 2 && genv->mouse_x < SPACE * 4 && genv->mouse_y > SPACE / 2 &&
